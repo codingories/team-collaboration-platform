@@ -25,8 +25,7 @@ public class AuthController {
     }
 
     @PostMapping("/auth/login")
-    public void login(@RequestBody String username, @RequestBody String password) {
-        System.out.println("username: " + username);
-        System.out.println("password: " + password);
+    public void login(@RequestBody Map<String, Object> usernameAndPasswordJson) {
+        System.out.println("usernameAndPasswordJson: " + usernameAndPasswordJson);
     }
 }
