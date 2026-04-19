@@ -1,7 +1,6 @@
 package hello; // 请替换为你的实际包名
 
-import hello.service.OrderService;
-import hello.service.User;
+import hello.entity.User;
 import hello.service.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
