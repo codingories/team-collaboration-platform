@@ -63,6 +63,59 @@ public class AuthController {
         }
     }
 
+    // ====================== 新增：注册接口 ======================
+    @PostMapping("/auth/register")
+    public Result register(@RequestBody Map<String, String> registerJson) {
+        String username = registerJson.get("username");
+        String password = registerJson.get("password");
+
+        // 用户名校验
+        if (username == null || username.trim().isEmpty()) {
+            return new Result("fail", "用户名不能为空", false);
+        }
+        if (username.isEmpty() || username.length() > 15) {
+            return new Result("fail", "用户名长度必须在 1-15 个字符之间", false);
+        }
+        String usernameRegex = "^[a-zA-Z0-9_\\u4e00-\\u9fa5]+$";
+
+        if (!username.matches(usernameRegex)) {
+            return new Result("fail", "用户名只能包含字母、数字、下划线和中文", false);
+        }
+
+        // 密码校验
+        if (password == null || password.trim().isEmpty()) {
+            return new Result("fail", "密码不能为空", false);
+        }
+        if (password.length() < 6 || password.length() > 16) {
+            return new Result("fail", "密码长度必须在 6-16 个字符之间", false);
+        }
+
+        // 检查用户名是否已存在
+        User existUser = userService.getUserByUsername(username);
+        if (existUser != null) {
+            return new Result("fail", "用户名已被注册", false);
+        }
+
+        // 创建用户
+        userService.save(username, password);
+        return new Result("ok", "注册成功", false);
+    }
+
+    @GetMapping("/auth/logout")
+    public Result logout() {
+        // 获取当前登录用户
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // 未登录
+        if ("anonymousUser".equals(username)) {
+            return new Result("fail", "用户尚未登录", false);
+        }
+
+        // 已登录 → 执行登出
+        SecurityContextHolder.clearContext();
+        return new Result("ok", "注销成功", false);
+    }
+
     public static class Result {
         String status;
         String msg;
