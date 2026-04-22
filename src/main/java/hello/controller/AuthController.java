@@ -1,5 +1,6 @@
 package hello.controller;
 
+import hello.entity.Result;
 import hello.entity.User;
 import hello.service.UserService;
 import org.springframework.dao.DuplicateKeyException;
@@ -19,6 +20,7 @@ import java.util.Map;
 public class AuthController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
+    private static final String USERNAME_REGEX = "^[a-zA-Z0-9_\\u4e00-\\u9fa5]+$";
 
     @Inject
     public AuthController( UserService userService,
@@ -36,11 +38,9 @@ public class AuthController {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         User loggedInUser = userService.getUserByUsername(userName);
 
-        if(loggedInUser == null){
-            return new Result("ok", "用户没有登录", false );
-        } else {
-            return new Result("ok", null, true, loggedInUser);
-        }
+        return loggedInUser == null
+                ? Result.fail("用户没有登录")
+                : Result.ok("已登录", true, loggedInUser);
     }
 
     @PostMapping("/auth/login")
@@ -51,7 +51,7 @@ public class AuthController {
         try {
             userDetails = userService.loadUserByUsername(username);
         } catch (UsernameNotFoundException e) {
-            return new Result("fail", "用户不存在", false);
+            return Result.fail("用户不存在");
         }
 
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userDetails, password, userDetails.getAuthorities());
@@ -60,9 +60,9 @@ public class AuthController {
             // 把用户信息保存在一个地方
             // Cookie
             SecurityContextHolder.getContext().setAuthentication(token);
-            return new Result("ok", "登录成功", true, userService.getUserByUsername(username));
+            return Result.ok("登录成功", true, userService.getUserByUsername(username));
         } catch (BadCredentialsException e) {
-            return new Result("fail", "密码不正确", false);
+            return Result.fail("密码不正确");
         }
     }
 
@@ -74,36 +74,36 @@ public class AuthController {
 
         // 用户名校验
         if (username == null || username.trim().isEmpty()) {
-            return new Result("fail", "用户名不能为空", false);
+            return Result.fail("用户名不能为空");
         }
-        if (username.isEmpty() || username.length() > 15) {
-            return new Result("fail", "用户名长度必须在 1-15 个字符之间", false);
+        if (username.length() > 15) {
+            return Result.fail("用户名长度必须在 1-15 个字符之间");
         }
-        String usernameRegex = "^[a-zA-Z0-9_\\u4e00-\\u9fa5]+$";
 
-        if (!username.matches(usernameRegex)) {
-            return new Result("fail", "用户名只能包含字母、数字、下划线和中文", false);
+        if (!username.matches(USERNAME_REGEX)) {
+            return Result.fail("用户名只能包含字母、数字、下划线和中文");
+
         }
 
         // 密码校验
         if (password == null || password.trim().isEmpty()) {
-            return new Result("fail", "密码不能为空", false);
+            return Result.fail("密码不能为空");
         }
         if (password.length() < 6 || password.length() > 16) {
-            return new Result("fail", "密码长度必须在 6-16 个字符之间", false);
+            return Result.fail("密码长度必须在 6-16 个字符之间");
         }
 
         try {
             // 保存用户（已加密密码）
             userService.save(username, password);
-            return new Result("ok", "注册成功", false);
+            return Result.ok("注册成功", false);
         } catch (DuplicateKeyException e) {
             // 捕获：用户名重复（数据库唯一约束报错）
-            System.out.println("FUCK E"+ e);
-            return new Result("fail", "用户名已被注册", false);
+            return Result.fail("用户名已被注册");
         } catch (Exception e) {
             // 捕获其他所有异常
-            return new Result("fail", "注册失败，请稍后重试", false);
+            return Result.fail("注册失败，请稍后重试");
+
         }
     }
 
@@ -114,45 +114,11 @@ public class AuthController {
 
         // 未登录
         if ("anonymousUser".equals(username)) {
-            return new Result("fail", "用户尚未登录", false);
+            return Result.fail("用户尚未登录");
         }
 
         // 已登录 → 执行登出
         SecurityContextHolder.clearContext();
-        return new Result("ok", "注销成功", false);
-    }
-
-    public static class Result {
-        String status;
-        String msg;
-        boolean isLogin;
-        Object data;
-
-        public Result(String status, String msg, boolean isLogin) {
-            this(status, msg, isLogin, null);
-        }
-
-        public Result(String status, String msg, boolean isLogin, Object data) {
-            this.status = status;
-            this.msg = msg;
-            this.isLogin = isLogin;
-            this.data = data;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-
-        public String getMsg() {
-            return msg;
-        }
-
-        public boolean isLogin() {
-            return isLogin;
-        }
-
-        public Object getData() {
-            return data;
-        }
+        return Result.ok("注销成功", false);
     }
 }
