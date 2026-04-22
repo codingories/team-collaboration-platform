@@ -2,6 +2,7 @@ package hello.controller;
 
 import hello.entity.User;
 import hello.service.UserService;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.inject.Inject;
 import java.util.Map;
 
 // 改成 @RestController 或者保留 @Controller + 方法上加 @ResponseBody
@@ -18,6 +20,7 @@ public class AuthController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
 
+    @Inject
     public AuthController( UserService userService,
                           AuthenticationManager authenticationManager) {
         this.userService = userService;
@@ -90,15 +93,18 @@ public class AuthController {
             return new Result("fail", "密码长度必须在 6-16 个字符之间", false);
         }
 
-        // 检查用户名是否已存在
-        User existUser = userService.getUserByUsername(username);
-        if (existUser != null) {
+        try {
+            // 保存用户（已加密密码）
+            userService.save(username, password);
+            return new Result("ok", "注册成功", false);
+        } catch (DuplicateKeyException e) {
+            // 捕获：用户名重复（数据库唯一约束报错）
+            System.out.println("FUCK E"+ e);
             return new Result("fail", "用户名已被注册", false);
+        } catch (Exception e) {
+            // 捕获其他所有异常
+            return new Result("fail", "注册失败，请稍后重试", false);
         }
-
-        // 创建用户
-        userService.save(username, password);
-        return new Result("ok", "注册成功", false);
     }
 
     @GetMapping("/auth/logout")
