@@ -4,9 +4,11 @@ import hello.entity.Result;
 import hello.entity.User;
 import hello.service.UserService;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -35,11 +37,18 @@ public class AuthController {
      */
     @GetMapping("/auth")
     public Object auth() {
-        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // 未登录 或 匿名用户 → 直接返回未登录
+        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+            return Result.fail("用户没有登录");
+        }
+
+        String userName = authentication.getName();
         User loggedInUser = userService.getUserByUsername(userName);
 
         return loggedInUser == null
-                ? Result.fail("用户没有登录")
+                ? Result.fail("用户没有登路")
                 : Result.ok("已登录", true, loggedInUser);
     }
 
