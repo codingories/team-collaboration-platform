@@ -48,7 +48,7 @@ public class AuthController {
         User loggedInUser = userService.getUserByUsername(userName);
 
         return loggedInUser == null
-                ? Result.fail("用户没有登路")
+                ? Result.fail("用户没有登录")
                 : Result.ok("已登录", true, loggedInUser);
     }
 
