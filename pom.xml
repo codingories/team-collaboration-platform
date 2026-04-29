@@ -200,17 +200,7 @@
                     </includes>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-maven-plugin</artifactId>
-                <version>5.2.4</version>
-                <configuration>
-                    <!-- 数据库连接信息 直接写在这里！！ -->
-                    <url>jdbc:mysql://localhost:3306/xdml?useSSL=false&amp;serverTimezone=UTC</url>
-                    <user>root</user>
-                    <password>root</password>
-                </configuration>
-            </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -236,7 +226,7 @@
                                 <argument>-p</argument>
                                 <argument>3307:3306</argument>
                                 <argument>-d</argument>
-                                <argument>mysql</argument>
+                                <argument>mysql:5.7.27</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -251,13 +241,7 @@
                             <executable>cmd</executable>
                             <arguments>
                                 <argument>/c</argument>
-                                <argument>
-                                    for /L %i in (1,1,30) do (
-                                    docker exec test-mysql mysqladmin ping -uroot -proot --silent 2>nul
-                                    if not errorlevel 1 exit 0
-                                    echo Waiting for MySQL... &amp;&amp; timeout /t 2 /nobreak >nul
-                                    )
-                                </argument>
+                                <argument>ping -n 30 127.0.0.1</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -275,6 +259,32 @@
                                 <argument>-f</argument>
                                 <argument>test-mysql</argument>
                             </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>5.2.4</version>
+                <configuration>
+                    <!-- 数据库连接信息 直接写在这里！！ -->
+                    <url>jdbc:mysql://localhost:3307/xdml?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true</url>
+                    <user>root</user>
+                    <password>root</password>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>test-database-setup</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>migrate</goal>
+                        </goals>
+                        <configuration>
+                            <!-- 区分正式的数据库 -->
+                            <url>jdbc:mysql://localhost:3307/xdml?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true</url>
+                            <user>root</user>
+                            <password>root</password>
                         </configuration>
                     </execution>
                 </executions>
