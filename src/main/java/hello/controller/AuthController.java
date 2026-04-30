@@ -1,5 +1,6 @@
 package hello.controller;
 
+import hello.entity.LoginResult;
 import hello.entity.Result;
 import hello.entity.User;
 import hello.service.UserService;
@@ -36,20 +37,20 @@ public class AuthController {
      * @return 登录状态 JSON
      */
     @GetMapping("/auth")
-    public Object auth() {
+    public Result auth() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         // 未登录 或 匿名用户 → 直接返回未登录
         if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
-            return Result.fail("用户没有登录");
+            return LoginResult.success("用户没有登录", false);
         }
 
         String userName = authentication.getName();
         User loggedInUser = userService.getUserByUsername(userName);
 
         return loggedInUser == null
-                ? Result.fail("用户没有登录")
-                : Result.ok("已登录", true, loggedInUser);
+                ? LoginResult.success("用户没有登录", false)
+                : LoginResult.success("已登录", true, loggedInUser);
     }
 
     @PostMapping("/auth/login")
@@ -60,7 +61,7 @@ public class AuthController {
         try {
             userDetails = userService.loadUserByUsername(username);
         } catch (UsernameNotFoundException e) {
-            return Result.fail("用户不存在");
+            return LoginResult.fail("用户不存在");
         }
 
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userDetails, password, userDetails.getAuthorities());
@@ -69,9 +70,9 @@ public class AuthController {
             // 把用户信息保存在一个地方
             // Cookie
             SecurityContextHolder.getContext().setAuthentication(token);
-            return Result.ok("登录成功", true, userService.getUserByUsername(username));
+            return LoginResult.success("登录成功", true, userService.getUserByUsername(username));
         } catch (BadCredentialsException e) {
-            return Result.fail("密码不正确");
+            return LoginResult.fail("密码不正确");
         }
     }
 
@@ -83,35 +84,35 @@ public class AuthController {
 
         // 用户名校验
         if (username == null || username.trim().isEmpty()) {
-            return Result.fail("用户名不能为空");
+            return LoginResult.fail("用户名不能为空");
         }
         if (username.length() > 15) {
-            return Result.fail("用户名长度必须在 1-15 个字符之间");
+            return LoginResult.fail("用户名长度必须在 1-15 个字符之间");
         }
 
         if (!username.matches(USERNAME_REGEX)) {
-            return Result.fail("用户名只能包含字母、数字、下划线和中文");
+            return LoginResult.fail("用户名只能包含字母、数字、下划线和中文");
 
         }
 
         // 密码校验
         if (password == null || password.trim().isEmpty()) {
-            return Result.fail("密码不能为空");
+            return LoginResult.fail("密码不能为空");
         }
         if (password.length() < 6 || password.length() > 16) {
-            return Result.fail("密码长度必须在 6-16 个字符之间");
+            return LoginResult.fail("密码长度必须在 6-16 个字符之间");
         }
 
         try {
             // 保存用户（已加密密码）
             userService.save(username, password);
-            return Result.ok("注册成功", false);
+            return LoginResult.success("注册成功", false);
         } catch (DuplicateKeyException e) {
             // 捕获：用户名重复（数据库唯一约束报错）
-            return Result.fail("用户名已被注册");
+            return LoginResult.fail("用户名已被注册");
         } catch (Exception e) {
             // 捕获其他所有异常
-            return Result.fail("注册失败，请稍后重试");
+            return LoginResult.fail("注册失败，请稍后重试");
 
         }
     }
@@ -123,11 +124,11 @@ public class AuthController {
 
         // 未登录
         if ("anonymousUser".equals(username)) {
-            return Result.fail("用户尚未登录");
+            return LoginResult.fail("用户尚未登录");
         }
 
         // 已登录 → 执行登出
         SecurityContextHolder.clearContext();
-        return Result.ok("注销成功", false);
+        return LoginResult.success("注销成功", false);
     }
 }
