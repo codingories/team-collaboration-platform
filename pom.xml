@@ -268,8 +268,7 @@
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>5.2.4</version>
                 <configuration>
-                    <!-- 数据库连接信息 直接写在这里！！ -->
-                    <url>jdbc:mysql://localhost:3307/xdml?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true</url>
+                    <url>jdbc:mysql://localhost:3306/xdml?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true</url>
                     <user>root</user>
                     <password>root</password>
                 </configuration>
