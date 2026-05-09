@@ -1,15 +1,27 @@
 package hello.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.Instant;
 
 public class Blog {
     private Long id;
+    @JsonIgnore
     private Integer userId;
     private String title;
     private String description;
     private String content;
     private Instant createdAt;
     private Instant  updatedAt;
+    private User user;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     public Long getId() {
         return id;

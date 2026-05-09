@@ -16,4 +16,8 @@ public interface UserMapper {
     void save(
             @Param("username") String username,
             @Param("encodedPassword") String encodedPassword
-    );}
+    );
+
+    @Select("SELECT * FROM user WHERE id = #{id}")
+    User getUserById(@Param("id") Integer id);
+}

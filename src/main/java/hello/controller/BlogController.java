@@ -20,7 +20,7 @@ public class BlogController {
 
     @GetMapping("/blog")
     @ResponseBody
-    public Result getBlogs(@RequestParam("page") Integer page, @RequestParam("userId") Integer userId) {
+    public Result getBlogs(@RequestParam("page") Integer page, @RequestParam(value="userId", required = false) Integer userId) {
         if(page == null || page<0) {
             page = 1;
         }
