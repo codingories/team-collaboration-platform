@@ -1,4 +1,4 @@
-package hello.entity;
+package hello.result;
 
 public abstract class Result<T> {
     String status;

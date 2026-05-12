@@ -1,7 +1,7 @@
 package hello.service;
 
 import hello.dao.BlogDao;
-import hello.entity.Result;
+import hello.result.Result;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
