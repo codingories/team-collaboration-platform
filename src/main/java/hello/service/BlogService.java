@@ -63,4 +63,17 @@ public class BlogService {
 
         return SingleBlogResult.ok("创建成功", blog);
     }
+
+    public SingleBlogResult getBlog(Long blogId) {
+        Blog blog = blogMapper.findById(blogId);
+        if (blog == null) {
+            return SingleBlogResult.fail("系统异常");
+        }
+
+        User user = userService.getUserById(blog.getUserId());
+        blog.setUser(user);
+
+        return SingleBlogResult.ok("获取成功", blog);
+    }
+
 }

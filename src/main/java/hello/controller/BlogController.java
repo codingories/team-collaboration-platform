@@ -47,4 +47,10 @@ public class BlogController {
 
         return blogService.createBlog(request, username);
     }
+
+    @GetMapping("/blog/{blogId}")
+    @ResponseBody
+    public SingleBlogResult getBlog(@PathVariable Long blogId) {
+        return blogService.getBlog(blogId);
+    }
 }
