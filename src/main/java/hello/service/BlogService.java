@@ -4,6 +4,7 @@ import hello.dao.BlogDao;
 import hello.entity.*;
 import hello.request.BlogCreateRequest;
 import hello.mapper.BlogMapper;
+import hello.request.BlogUpdateRequest;
 import org.springframework.stereotype.Service;
 import hello.result.BlogResult;
 import hello.result.SingleBlogResult;
@@ -76,4 +77,27 @@ public class BlogService {
         return SingleBlogResult.ok("获取成功", blog);
     }
 
+    public SingleBlogResult updateBlog(Long blogId, BlogUpdateRequest request, String username) {
+        Blog blog = blogMapper.findById(blogId);
+        if (blog == null) {
+            return SingleBlogResult.fail("博客不存在");
+        }
+
+        User currentUser = userService.getUserByUsername(username);
+        if (!blog.getUserId().equals(currentUser.getId())) {
+            return SingleBlogResult.fail("无法修改别人的博客");
+        }
+
+        // 只更新传入的字段
+        if (request.getTitle() != null) blog.setTitle(request.getTitle());
+        if (request.getContent() != null) blog.setContent(request.getContent());
+        if (request.getDescription() != null) blog.setDescription(request.getDescription());
+        if (request.getAtIndex() != null) blog.setAtIndex(request.getAtIndex());
+        blog.setUpdatedAt(Instant.now());
+
+        blogMapper.updateBlog(blog);
+
+        blog.setUser(currentUser);
+        return SingleBlogResult.ok("修改成功", blog);
+    }
 }

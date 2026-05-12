@@ -13,4 +13,9 @@ public interface BlogMapper {
 
     @Select("SELECT * FROM blog WHERE id = #{id}")
     Blog findById(Long id);
+
+    @Update("UPDATE blog SET title = #{title}, content = #{content}, " +
+            "description = #{description}, at_index = #{atIndex}, updated_at = #{updatedAt} " +
+            "WHERE id = #{id}")
+    void updateBlog(Blog blog);
 }

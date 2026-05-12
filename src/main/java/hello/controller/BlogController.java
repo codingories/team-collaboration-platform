@@ -1,5 +1,6 @@
 package hello.controller;
 
+import hello.request.BlogUpdateRequest;
 import hello.result.SingleBlogResult;
 import hello.request.BlogCreateRequest;
 import hello.result.Result;
@@ -52,5 +53,18 @@ public class BlogController {
     @ResponseBody
     public SingleBlogResult getBlog(@PathVariable Long blogId) {
         return blogService.getBlog(blogId);
+    }
+
+
+    @PatchMapping("/blog/{blogId}")
+    @ResponseBody
+    public SingleBlogResult updateBlog(@PathVariable Long blogId,
+                                       @RequestBody BlogUpdateRequest request) {
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        if ("anonymousUser".equals(username)) {
+            return SingleBlogResult.fail("登录后才能操作");
+        }
+        return blogService.updateBlog(blogId, request, username);
     }
 }

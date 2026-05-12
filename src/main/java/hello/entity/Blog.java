@@ -15,6 +15,17 @@ public class Blog {
     private Instant  updatedAt;
     private User user;
 
+    public Boolean getAtIndex() {
+        return atIndex;
+    }
+
+    public void setAtIndex(Boolean atIndex) {
+        this.atIndex = atIndex;
+    }
+
+    private Boolean atIndex;
+
+
     public User getUser() {
         return user;
     }
