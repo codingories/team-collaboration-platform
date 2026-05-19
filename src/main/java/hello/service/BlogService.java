@@ -5,6 +5,8 @@ import hello.entity.*;
 import hello.request.BlogCreateRequest;
 import hello.mapper.BlogMapper;
 import hello.request.BlogUpdateRequest;
+import hello.result.Result;
+import hello.result.VoidResult;
 import org.springframework.stereotype.Service;
 import hello.result.BlogResult;
 import hello.result.SingleBlogResult;
@@ -99,5 +101,18 @@ public class BlogService {
 
         blog.setUser(currentUser);
         return SingleBlogResult.ok("修改成功", blog);
+    }
+
+    public Result<Void> deleteBlog(Long blogId, String username) {
+        Blog blog = blogMapper.findById(blogId);
+        if (blog == null) {
+            return VoidResult.fail("博客不存在");
+        }
+        User user = userService.getUserById(blog.getUserId());
+        if (!user.getUsername().equals(username)) {
+            return VoidResult.fail("无法删除别人的博客");
+        }
+        blogMapper.deleteBlogById(blogId);
+        return VoidResult.ok("删除成功");
     }
 }

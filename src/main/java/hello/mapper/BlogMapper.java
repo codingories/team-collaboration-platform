@@ -18,4 +18,7 @@ public interface BlogMapper {
             "description = #{description}, at_index = #{atIndex}, updated_at = #{updatedAt} " +
             "WHERE id = #{id}")
     void updateBlog(Blog blog);
+
+    @Delete("DELETE FROM blog WHERE id = #{id}")
+    void deleteBlogById(Long id);
 }

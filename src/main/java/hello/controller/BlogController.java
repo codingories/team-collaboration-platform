@@ -67,4 +67,11 @@ public class BlogController {
         }
         return blogService.updateBlog(blogId, request, username);
     }
+
+    @DeleteMapping("/blog/{blogId}")
+    @ResponseBody
+    public Result<Void> deleteBlog(@PathVariable Long blogId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return blogService.deleteBlog(blogId, username);
+    }
 }
